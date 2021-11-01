@@ -104,19 +104,7 @@ public class DotsAndBoxes{
         return results.stream().filter(this::testFullBox).collect(Collectors.toSet());
     }
 
-    public void playerMove(Player p) {  // draws a line for a player
-        int max = 0;
-        Edge e = null;
-        for(Map.Entry<Edge,Integer> entry : analyzeMoves().entrySet()){
-            Map<Edge, Integer> pm = playerMoveRecursive(entry.getKey());
-            pm.put(entry.getKey(), entry.getValue());
-            int sum = pm.values().stream().mapToInt(x -> x).sum();
-
-            if(max < sum) {
-                max = sum;
-                e = entry.getKey();
-            }
-        }
+    public boolean playerMove(Player p) {  // draws a line for a player
         //System.out.println(max);
         Edge e = strategies.get(p).choose(nodes);
         e.activate();
