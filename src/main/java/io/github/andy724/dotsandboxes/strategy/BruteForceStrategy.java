@@ -2,9 +2,10 @@ package io.github.andy724.dotsandboxes.strategy;
 
 import io.github.andy724.dotsandboxes.board.Edge;
 import io.github.andy724.dotsandboxes.board.Node;
+import io.github.andy724.dotsandboxes.board.WeightedEdge;
+import io.github.andy724.dotsandboxes.board.view.BoardView;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -12,7 +13,20 @@ import java.util.stream.IntStream;
 import static java.util.Comparator.comparingInt;
 
 public class BruteForceStrategy implements GameStrategy{
-    Map<Integer,WeightedEdge> cache;
+    Map<Integer,IndexedWeightedEdge> cache;
+
+    private static class IndexedWeightedEdge{
+        final int index,weight;
+
+        public IndexedWeightedEdge(int index, int weight){
+            this.index = index;
+            this.weight = weight;
+        }
+
+        public @NotNull Edge edge(@NotNull BoardView board){
+            return edges(board)[index];
+        }
+    }
 
     public BruteForceStrategy(@NotNull Node[][] nodes){
         cache = new HashMap<>();
@@ -23,7 +37,7 @@ public class BruteForceStrategy implements GameStrategy{
             for(int i = 0;i < edges.length;i++)
                 edges[i].active = (state & (1 << i)) == 0;
             // if there is only one deactivated state, set weighted edge at that point to the edge with a weight of 1
-            Edge[] inactive = Arrays.stream(edges).filter(edge -> !edge.active).toArray(Edge[]::new);
+            int[] inactive = IntStream.range(0,edges.length).filter(x -> !edges[x].active).toArray();
             if(inactive.length == 1) {
                 cache.put(hash(nodes), new WeightedEdge(inactive[0], 1));
             } else if(inactive.length != 0) { // else, go through the deactivated states
@@ -39,7 +53,7 @@ public class BruteForceStrategy implements GameStrategy{
 
                                     int wonBoxes = boxesFilled(edges,x, nodes.length, nodes[0].length);
                                     if(wonBoxes != 0)
-                                        return new WeightedEdge(edges[x], wonBoxes + nextScore);
+                                        return new IndexedWeightedEdge(x, wonBoxes + nextScore);
                                     else
                                         return new WeightedEdge(edges[x], -nextScore);
 
@@ -47,12 +61,6 @@ public class BruteForceStrategy implements GameStrategy{
                                 .sorted(comparingInt((WeightedEdge weighted) -> weighted.weight).reversed())
                                 .findFirst().orElse(new WeightedEdge(inactive[0],0))
                 );
-
-
-
-                // if it finishes a box
-                // set score to finished game state + 1
-                // find the largest of all those finished states and set the score at this state to that.
             }
         }
     }
@@ -77,21 +85,21 @@ public class BruteForceStrategy implements GameStrategy{
         return result;
     }
 
-    private static Edge[] edges(@NotNull Node[][] board){
-        Edge[] result = new Edge[board.length * (board[0].length - 1) + board[0].length * (board.length - 1)];
+    private static Edge[] edges(@NotNull BoardView board){
+        Edge[] result = new Edge[board.height() * (board.width() - 1) + board.width() * (board.height() - 1)];
         int index = 0;
         // get horizontals
-        for(int y = 0;y < board.length;y++)
-            for(int x = 0;x < board[y].length - 1;x++)
-                result[index++] = board[y][x].right;
+        for(int y = 0;y < board.height();y++)
+            for(int x = 0;x < board.width() - 1;x++)
+                result[index++] = board.at(x,y).right().base();
         // get verticals
-        for(int y = 0;y < board.length - 1;y++)
-            for(int x = 0;x < board[y].length;x++)
-                result[index++] = board[y][x].down;
+        for(int y = 0;y < board.height() - 1;y++)
+            for(int x = 0;x < board.width();x++)
+                result[index++] = board.at(x,y).down().base();
         return result;
     }
 
-    private static int hash(@NotNull Node[][] board){
+    private static int hash(@NotNull BoardView board){
         Edge[] edges = edges(board);
         return IntStream
                 .range(0,edges.length)
@@ -104,14 +112,8 @@ public class BruteForceStrategy implements GameStrategy{
         return e.edge;
     }
 
-    private static class WeightedEdge{
-        Edge edge;
-        int weight;
-
-        public WeightedEdge(@NotNull Edge edge, int weight){
-            this.edge = edge;
-            this.weight = weight;
-        }
+    @Override public @NotNull BoardView view(@NotNull Node[][] board){
+        return new BoardView(board,board[0].length,board.length);
     }
 }
 

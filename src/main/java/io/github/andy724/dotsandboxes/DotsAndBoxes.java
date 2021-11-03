@@ -2,8 +2,7 @@ package io.github.andy724.dotsandboxes;
 
 import io.github.andy724.dotsandboxes.board.Edge;
 import io.github.andy724.dotsandboxes.board.Node;
-import io.github.andy724.dotsandboxes.strategy.BruteForceStrategy;
-import io.github.andy724.dotsandboxes.strategy.GameStrategy;
+import io.github.andy724.dotsandboxes.strategy.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -123,6 +122,35 @@ public class DotsAndBoxes{
      * 3 4: 2
      * 4 3: 2
      * 4 4: 2
+     * -––––––––––––––––––– 2x2 vs 3x3 -–––––––––––––––––––
+     * 20 20
+     *      (3x3 view – 1, 2x2 view – 2): 2 (49 to 312) - 2x2 wins
+     *      (2x2 view – 1, 3x3 view – 2): 1 (324 to 37) - 2x2 wins
+     *
+     * -––––––––––––––––––– 3x3 vs 4x4 -–––––––––––––––––––
+     * 7 7
+     *      (4x4 view - 1, 3x3 view - 2): 1 (19 to 17) - 4x4 wins
+     *      (3x3 view - 1, 4x4 view - 2): 1 (21 to 15) - 3x3 wins
+     *      (3x3 view - 1, 3x3 view - 2): tie (18 to 18)
+     *      (4x4 view - 1, 4x4 view - 2): 2 (13 to 23)
+     *
+     * 8 8
+     *      (4x4 view - 1, 3x3 view - 2): 2 (16 to 33) – 3x3 wins
+     *      (3x3 view - 1, 4x4 view - 2): 1 (28 to 21) – 3x3 wins
+     *      (3x3 view - 1, 3x3 view - 2): 2 (24 to 25)
+     *      (4x4 view - 1, 4x4 view - 2): 1 (25 to 24)
+     *
+     * 9 9
+     *      (4x4 view - 1, 3x3 view - 2): 1 (33 to 31) – 4x4 wins
+     *      (3x3 view - 1, 4x4 view - 2): 1 (38 to 26) – 3x3 wins
+     *      (3x3 view - 1, 3x3 view - 2): 1 (43 to 21)
+     *      (4x4 view - 1, 4x4 view - 2): 1 (39 to 25)
+     *
+     * 10 10
+     *      (4x4 view – 1, 3x3 view - 2): 1 (42 to 39) – 4x4 wins
+     *      (3x3 view - 1, 4x4 view - 2): 1 (56 to 25) – 3x3 wins
+     *      (3x3 view - 1, 3x3 view - 2): 2 (36 to 45)
+     *      (4x4 view - 1, 4x4 view - 2): 2 (37 to 44)
      */
     public static void main(@NotNull String[] args){
         int width = Integer.parseInt(args[0]);
@@ -143,6 +171,7 @@ public class DotsAndBoxes{
             System.out.println(i + 1);
             System.out.println(game);
         }
+        System.out.println(game);
     }
 
     @Override public @NotNull String toString(){
