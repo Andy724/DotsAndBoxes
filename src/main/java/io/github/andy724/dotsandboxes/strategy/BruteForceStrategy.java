@@ -32,34 +32,35 @@ public class BruteForceStrategy implements GameStrategy{
         cache = new HashMap<>();
         // actually loop through all possible boards
         // mapping game state to edges to draw
-        Edge[] edges = edges(nodes);
+        Edge[] edges = edges(view(nodes));
+        BoardView view = view(nodes);
         for(int state = 0;state < Math.pow(2,edges.length);state++){
             for(int i = 0;i < edges.length;i++)
                 edges[i].active = (state & (1 << i)) == 0;
             // if there is only one deactivated state, set weighted edge at that point to the edge with a weight of 1
             int[] inactive = IntStream.range(0,edges.length).filter(x -> !edges[x].active).toArray();
             if(inactive.length == 1) {
-                cache.put(hash(nodes), new WeightedEdge(inactive[0], 1));
+                cache.put(hash(view),new IndexedWeightedEdge(inactive[0], 1));
             } else if(inactive.length != 0) { // else, go through the deactivated states
-                cache.put(hash(nodes),
+                cache.put(hash(view),
                         IntStream
                                 .range(0,edges.length)
                                 .filter(x -> !edges[x].active)
                                 .mapToObj(x -> {
                                     // adds your possible points
                                     edges[x].activate();
-                                    int nextScore = cache.get(hash(nodes)).weight;
+                                    int nextScore = cache.get(hash(view)).weight;
                                     edges[x].deactivate();
 
                                     int wonBoxes = boxesFilled(edges,x, nodes.length, nodes[0].length);
                                     if(wonBoxes != 0)
                                         return new IndexedWeightedEdge(x, wonBoxes + nextScore);
                                     else
-                                        return new WeightedEdge(edges[x], -nextScore);
+                                        return new IndexedWeightedEdge(x, -nextScore);
 
                                 })
-                                .sorted(comparingInt((WeightedEdge weighted) -> weighted.weight).reversed())
-                                .findFirst().orElse(new WeightedEdge(inactive[0],0))
+                                .sorted(comparingInt((IndexedWeightedEdge weighted) -> weighted.weight).reversed())
+                                .findFirst().orElse(new IndexedWeightedEdge(inactive[0],0))
                 );
             }
         }
@@ -106,10 +107,12 @@ public class BruteForceStrategy implements GameStrategy{
                 .reduce(0,(acc,x) -> edges[x].active ? acc | (1 << x) : acc);
     }
 
-    @Override public @NotNull Edge choose(@NotNull Node[][] board){
-        WeightedEdge e = cache.get(hash(board));
-        System.out.println("Weight: " + e.weight);
-        return e.edge;
+    @Override public @NotNull WeightedEdge choose(@NotNull BoardView board){
+        IndexedWeightedEdge e = cache.get(hash(board));
+        if(e == null)
+            throw new IllegalStateException("No available edges");
+        //System.out.println("Weight: " + e.weight);
+        return new WeightedEdge(e.edge(board),e.weight);
     }
 
     @Override public @NotNull BoardView view(@NotNull Node[][] board){

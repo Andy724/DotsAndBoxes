@@ -10,8 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomStrategy implements GameStrategy{
-    @Override public @NotNull Edge choose(@NotNull Node[][] board){
-        Edge chosen = null;
+    @Override public @NotNull WeightedEdge choose(@NotNull BoardView board){
+        EdgeView chosen = null;
         do{
             int x = ThreadLocalRandom.current().nextInt(board.width());
             int y = ThreadLocalRandom.current().nextInt(board.height());

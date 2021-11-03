@@ -9,6 +9,7 @@ public enum Player{
 
     Player(@NotNull String name){
         this.name = name;
+
     }
 
     public @NotNull Player next(){

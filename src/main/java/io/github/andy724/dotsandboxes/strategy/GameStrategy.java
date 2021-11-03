@@ -6,5 +6,6 @@ import io.github.andy724.dotsandboxes.board.view.BoardView;
 import org.jetbrains.annotations.NotNull;
 
 public interface GameStrategy{
-    @NotNull Edge choose(@NotNull Node[][] board);
+    @NotNull WeightedEdge choose(@NotNull BoardView board);
+    @NotNull BoardView view(@NotNull Node[][] board);
 }

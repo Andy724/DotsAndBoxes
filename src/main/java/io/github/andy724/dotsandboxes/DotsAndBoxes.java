@@ -20,9 +20,6 @@ public class DotsAndBoxes{
     private final Node[][] nodes;
     private Player next;
 
-    // game analysis
-    int[][] possibleScore;
-
     public DotsAndBoxes(int width, int height){
         // initialize points matrix
         points = new Player[height - 1][];
@@ -45,15 +42,9 @@ public class DotsAndBoxes{
             }
         }
 
-        // initialize possible score matrix
-        possibleScore = new int[height*2 -1][];
-        for(int i = 0; i < width; i++) {
-            possibleScore[i] = IntStream.range(0,i % 2 == 0 ? width - 1 : width).toArray();
-        }
-
         // set player strategies
         strategies.put(Player.ONE,new BruteForceStrategy(nodes));
-        strategies.put(Player.TWO,strategies.get(Player.ONE));
+        strategies.put(Player.TWO,new RandomStrategy());
 
         // set starting player
         next = Player.ONE;
@@ -105,7 +96,8 @@ public class DotsAndBoxes{
 
     public boolean playerMove(Player p) {  // draws a line for a player
         //System.out.println(max);
-        Edge e = strategies.get(p).choose(nodes);
+        GameStrategy strategy = strategies.get(p);
+        Edge e = strategy.choose(strategy.view(nodes)).edge;
         e.activate();
         Set<Node> boxes = findFullBox(e);
         for(Node n : boxes) {
